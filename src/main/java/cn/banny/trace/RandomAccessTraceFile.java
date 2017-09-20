@@ -61,7 +61,7 @@ class RandomAccessTraceFile implements TraceFile {
             if (parent != null && record.getMethodId() == parent.getMethodId()) {
                 if (record.getMethodAction() == MethodAction.ENTER) {
                     continue;
-                } else {
+                } else if (threadInfo.stack.isEmpty()){
                     break;
                 }
             }
