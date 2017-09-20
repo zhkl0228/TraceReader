@@ -38,6 +38,6 @@ class MethodSpec {
 
     @Override
     public String toString() {
-        return className + "." + methodName + parameters + "(" + line + ")";
+        return className + "." + methodName + parameters + " (" + source + ":" + line + ")";
     }
 }
