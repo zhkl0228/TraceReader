@@ -25,7 +25,7 @@ class RandomAccessTraceFile implements TraceFile {
 
     private static final int kTraceMethodActionMask = 0x3;
 
-    private Record readRecord() throws IOException {
+    private TraceRecord readRecord(Map<Integer, TraceThreadInfo> threadMap) throws IOException {
         long filePointer = traceFile.getFilePointer();
         switch (version) {
             case 3:
@@ -33,7 +33,11 @@ class RandomAccessTraceFile implements TraceFile {
                 int method = Integer.reverseBytes(traceFile.readInt());
                 int deltaTimeInUsec = Integer.reverseBytes(traceFile.readInt());
                 int wallTimeInUsec = Integer.reverseBytes(traceFile.readInt());
-                return new TraceRecord(filePointer, threadId, method & ~kTraceMethodActionMask, MethodAction.decodeAction(method & kTraceMethodActionMask), deltaTimeInUsec).setWallTimeInUsec(wallTimeInUsec);
+
+                TraceThreadInfo threadInfo = threadMap.get(threadId);
+                TraceRecord record = new TraceRecord(filePointer, threadId, method & ~kTraceMethodActionMask, MethodAction.decodeAction(method & kTraceMethodActionMask), deltaTimeInUsec, threadInfo, this);
+                record.setWallTimeInUsec(wallTimeInUsec);
+                return record;
             case 1:
             case 2:
             default:
@@ -41,14 +45,14 @@ class RandomAccessTraceFile implements TraceFile {
         }
     }
 
-    synchronized void getMethodCallNodes(Map<Integer, TraceThreadInfo> threadMap, long offset, MethodCallNode parent) throws IOException {
+    synchronized void getMethodCallNodes(Map<Integer, TraceThreadInfo> threadMap, long offset, Record parent) throws IOException {
         traceFile.seek(offset);
 
         long length = traceFile.length();
         while (traceFile.getFilePointer() + recordSize < length) {
-            Record record = readRecord();
+            TraceRecord record = readRecord(threadMap);
 
-            TraceThreadInfo threadInfo = threadMap.get(record.getThreadId());
+            TraceThreadInfo threadInfo = record.getThreadInfo();
             if (threadInfo == null) {
                 continue;
             }
@@ -72,6 +76,11 @@ class RandomAccessTraceFile implements TraceFile {
 
             switch (record.getMethodAction()) {
                 case ENTER:
+                    if (threadInfo.stack.isEmpty()) {
+                        record.setParent(parent);
+                    } else {
+                        record.setParent(threadInfo.stack.peek());
+                    }
                     threadInfo.stack.push(record);
                     break;
                 case EXIT:
@@ -80,7 +89,7 @@ class RandomAccessTraceFile implements TraceFile {
                         throw new IllegalStateException("exit method invalid: record=" + record + ", exit=" + exitRecord);
                     }
                     if (threadInfo.stack.isEmpty()) {
-                        threadInfo.list.add(new TraceMethodCallNode(threadInfo, exitRecord, this, parent));
+                        threadInfo.list.add(exitRecord.toMethodCallNode());
                     }
                     break;
                 case EXCEPTION:
@@ -89,7 +98,7 @@ class RandomAccessTraceFile implements TraceFile {
                         throw new IllegalStateException("exception method invalid: record=" + record + ", exception=" + exceptionRecord);
                     }
                     if (threadInfo.stack.isEmpty()) {
-                        threadInfo.list.add(new TraceMethodCallNode(threadInfo, exceptionRecord, this, parent));
+                        threadInfo.list.add(exceptionRecord.toMethodCallNode());
                     }
                     break;
             }
@@ -104,7 +113,7 @@ class RandomAccessTraceFile implements TraceFile {
                 threadInfo.stack.pop();
             }
             if (!threadInfo.stack.isEmpty()) {
-                threadInfo.list.add(new TraceMethodCallNode(threadInfo, threadInfo.stack.pop(), this, parent));
+                threadInfo.list.add(threadInfo.stack.pop().toMethodCallNode());
             }
         }
     }

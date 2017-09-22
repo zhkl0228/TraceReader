@@ -7,13 +7,18 @@ public class TraceRecord implements Record {
     private final int methodId;
     private final MethodAction methodAction;
     private final int deltaTimeInUsec;
+    private final TraceThreadInfo threadInfo;
+    private final RandomAccessTraceFile traceFile;
 
-    TraceRecord(long filePointer, int threadId, int methodId, MethodAction methodAction, int deltaTimeInUsec) {
+    TraceRecord(long filePointer, int threadId, int methodId, MethodAction methodAction, int deltaTimeInUsec, TraceThreadInfo threadInfo, RandomAccessTraceFile traceFile) {
         this.filePointer = filePointer;
         this.threadId = threadId;
         this.methodId = methodId;
         this.methodAction = methodAction;
         this.deltaTimeInUsec = deltaTimeInUsec;
+
+        this.threadInfo = threadInfo;
+        this.traceFile = traceFile;
     }
 
     public long getFilePointer() {
@@ -22,6 +27,11 @@ public class TraceRecord implements Record {
 
     public int getThreadId() {
         return threadId;
+    }
+
+    @Override
+    public TraceThreadInfo getThreadInfo() {
+        return threadInfo;
     }
 
     public int getMethodId() {
@@ -42,9 +52,19 @@ public class TraceRecord implements Record {
 
     private int wallTimeInUsec;
 
-    Record setWallTimeInUsec(int wallTimeInUsec) {
+    void setWallTimeInUsec(int wallTimeInUsec) {
         this.wallTimeInUsec = wallTimeInUsec;
-        return this;
+    }
+
+    private Record parent;
+
+    @Override
+    public Record getParent() {
+        return parent;
+    }
+
+    void setParent(Record parent) {
+        this.parent = parent;
     }
 
     @Override
@@ -55,5 +75,10 @@ public class TraceRecord implements Record {
                 ", methodId=0x" + Integer.toHexString(methodId) +
                 ", methodAction=" + methodAction +
                 '}';
+    }
+
+    @Override
+    public MethodCallNode toMethodCallNode() {
+        return new TraceMethodCallNode(this, traceFile);
     }
 }

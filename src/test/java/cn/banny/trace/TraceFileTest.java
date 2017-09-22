@@ -22,6 +22,7 @@ public class TraceFileTest extends TestCase {
         assertFalse(traceFile.getThreads().isEmpty());
         assertTrue(traceFile.getNumMethodCalls() > 0);
 
+        System.out.println();
         for (ThreadInfo threadInfo : traceFile.getThreads()) {
             if (threadInfo.getTop() != null) {
                 assertTrue("top is empty: " + threadInfo, threadInfo.getTop().length > 0);
@@ -41,7 +42,13 @@ public class TraceFileTest extends TestCase {
         for (MethodCallNode node : nodes) {
             System.out.println(prefix + node.getMethod());
 
-            dumpChildren(node.getChildren(), " " + prefix);
+            MethodCallNode[] children = node.getChildren();
+            dumpChildren(children, " " + prefix);
+
+            if (children == null || children.length < 1) {
+                System.out.println();
+                System.out.println(node.getStackTraceString());
+            }
         }
     }
 

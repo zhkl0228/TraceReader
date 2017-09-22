@@ -4,6 +4,8 @@ public interface Record {
 
     int getThreadId();
 
+    TraceThreadInfo getThreadInfo();
+
     int getMethodId();
 
     MethodAction getMethodAction();
@@ -13,5 +15,9 @@ public interface Record {
     int getWallTimeInUsec();
 
     long getFilePointer();
+
+    Record getParent();
+
+    MethodCallNode toMethodCallNode();
 
 }

@@ -8,27 +8,26 @@ public class TraceMethodCallNode implements MethodCallNode {
     private final TraceThreadInfo threadInfo;
     private final Record record;
     private final RandomAccessTraceFile traceFile;
-    private final MethodCallNode parent;
     private final MethodSpec method;
 
-    TraceMethodCallNode(TraceThreadInfo threadInfo, Record record, RandomAccessTraceFile traceFile, MethodCallNode parent) {
-        this.threadInfo = threadInfo;
+    TraceMethodCallNode(Record record, RandomAccessTraceFile traceFile) {
+        this.threadInfo = record.getThreadInfo();
         this.record = record;
         this.traceFile = traceFile;
-        this.parent = parent;
         this.method = traceFile.methodMap.get(record.getMethodId());
     }
 
-    public int getMethodId() {
-        return record.getMethodId();
-    }
-
     public MethodCallNode getParent() {
-        return parent;
+        Record parent = record.getParent();
+        if (parent == null) {
+            return null;
+        }
+
+        return parent.toMethodCallNode();
     }
 
     public MethodCallNode[] getChildren() throws IOException {
-        traceFile.getMethodCallNodes(Collections.singletonMap(threadInfo.getThreadId(), threadInfo), record.getFilePointer(), this);
+        traceFile.getMethodCallNodes(Collections.singletonMap(threadInfo.getThreadId(), threadInfo), record.getFilePointer(), record);
         return threadInfo.getNodes();
     }
 

@@ -4,8 +4,6 @@ import java.io.IOException;
 
 public interface MethodCallNode {
 
-    int getMethodId();
-
     MethodCallNode getParent();
 
     MethodCallNode[] getChildren() throws IOException;
