@@ -2,13 +2,13 @@ package cn.banny.trace;
 
 public interface Record {
 
-    int getThreadId();
-
     TraceThreadInfo getThreadInfo();
 
     int getMethodId();
 
     MethodAction getMethodAction();
+
+    int getThreadId();
 
     int getDeltaTimeInUsec();
 

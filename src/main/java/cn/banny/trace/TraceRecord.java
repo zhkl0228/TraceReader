@@ -67,6 +67,12 @@ public class TraceRecord implements Record {
         this.parent = parent;
     }
 
+    private int threadTimeInUsec;
+
+    void setThreadTimeInUsec(int threadTimeInUsec) {
+        this.threadTimeInUsec = threadTimeInUsec;
+    }
+
     @Override
     public String toString() {
         return "Record{" +
@@ -79,6 +85,6 @@ public class TraceRecord implements Record {
 
     @Override
     public MethodCallNode toMethodCallNode() {
-        return new TraceMethodCallNode(this, traceFile);
+        return new TraceMethodCallNode(this, traceFile, threadTimeInUsec);
     }
 }

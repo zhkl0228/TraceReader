@@ -34,7 +34,7 @@ class TraceThreadInfo implements ThreadInfo {
     }
 
     List<MethodCallNode> list;
-    Stack<Record> stack;
+    Stack<TraceRecord> stack;
 
     MethodCallNode[] getNodes() {
         MethodCallNode[] nodes = list == null ? null : list.toArray(new MethodCallNode[0]);

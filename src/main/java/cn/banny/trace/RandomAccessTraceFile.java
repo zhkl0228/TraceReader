@@ -45,12 +45,14 @@ class RandomAccessTraceFile implements TraceFile {
         }
     }
 
-    synchronized void getMethodCallNodes(Map<Integer, TraceThreadInfo> threadMap, long offset, Record parent) throws IOException {
+    synchronized void getMethodCallNodes(Map<Integer, TraceThreadInfo> threadMap, long offset, TraceRecord parent) throws IOException {
         traceFile.seek(offset);
+        // MethodSpec parentMethod = parent == null ? null : methodMap.get(parent.getMethodId());
 
         long length = traceFile.length();
         while (traceFile.getFilePointer() + recordSize < length) {
             TraceRecord record = readRecord(threadMap);
+            // MethodSpec method = methodMap.get(record.getMethodId());
 
             TraceThreadInfo threadInfo = record.getThreadInfo();
             if (threadInfo == null) {
@@ -59,45 +61,49 @@ class RandomAccessTraceFile implements TraceFile {
 
             if (threadInfo.list == null || threadInfo.stack == null) {
                 threadInfo.list = new ArrayList<MethodCallNode>();
-                threadInfo.stack = new Stack<Record>();
+                threadInfo.stack = new Stack<TraceRecord>();
+
+                if (parent == null) {
+                    threadInfo.stack.push(null);
+                }
             }
 
             if (parent != null && record.getMethodId() == parent.getMethodId()) {
-                if (record.getMethodAction() == MethodAction.ENTER) {
-                    continue;
-                } else if (threadInfo.stack.isEmpty()){
+                if (record.getMethodAction() != MethodAction.ENTER && threadInfo.stack.size() == 1) {
+                    threadInfo.stack.pop();
+                    parent.setThreadTimeInUsec(record.getDeltaTimeInUsec() - parent.getDeltaTimeInUsec());
                     break;
                 }
             }
 
-            if (threadInfo.stack.isEmpty() && record.getMethodAction() == MethodAction.EXIT) {
-                continue;
-            }
-
             switch (record.getMethodAction()) {
                 case ENTER:
-                    if (threadInfo.stack.isEmpty()) {
-                        record.setParent(parent);
-                    } else {
+                    if (!threadInfo.stack.isEmpty()) {
                         record.setParent(threadInfo.stack.peek());
+                    } else if(parent != null) {
+                        record = parent;
                     }
                     threadInfo.stack.push(record);
                     break;
                 case EXIT:
-                    Record exitRecord = threadInfo.stack.pop();
-                    if (exitRecord.getMethodId() != record.getMethodId() || exitRecord.getMethodAction() != MethodAction.ENTER) {
+                    TraceRecord exitRecord = threadInfo.stack.pop();
+                    if (exitRecord.getMethodId() != record.getMethodId()) {
                         throw new IllegalStateException("exit method invalid: record=" + record + ", exit=" + exitRecord);
                     }
-                    if (threadInfo.stack.isEmpty()) {
+
+                    exitRecord.setThreadTimeInUsec(record.getDeltaTimeInUsec() - exitRecord.getDeltaTimeInUsec());
+                    if (threadInfo.stack.size() == 1) {
                         threadInfo.list.add(exitRecord.toMethodCallNode());
                     }
                     break;
                 case EXCEPTION:
-                    Record exceptionRecord = threadInfo.stack.pop();
-                    if (exceptionRecord.getMethodId() != record.getMethodId() || exceptionRecord.getMethodAction() != MethodAction.ENTER) {
+                    TraceRecord exceptionRecord = threadInfo.stack.pop();
+                    if (exceptionRecord.getMethodId() != record.getMethodId()) {
                         throw new IllegalStateException("exception method invalid: record=" + record + ", exception=" + exceptionRecord);
                     }
-                    if (threadInfo.stack.isEmpty()) {
+
+                    exceptionRecord.setThreadTimeInUsec(record.getDeltaTimeInUsec() - exceptionRecord.getDeltaTimeInUsec());
+                    if (threadInfo.stack.size() == 1) {
                         threadInfo.list.add(exceptionRecord.toMethodCallNode());
                     }
                     break;
@@ -109,10 +115,10 @@ class RandomAccessTraceFile implements TraceFile {
                 continue;
             }
 
-            while (threadInfo.stack.size() > 1) {
+            while (threadInfo.stack.size() > 2) {
                 threadInfo.stack.pop();
             }
-            if (!threadInfo.stack.isEmpty()) {
+            if (threadInfo.stack.size() == 2) {
                 threadInfo.list.add(threadInfo.stack.pop().toMethodCallNode());
             }
         }

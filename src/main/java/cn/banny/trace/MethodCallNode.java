@@ -12,4 +12,6 @@ public interface MethodCallNode {
 
     String getStackTraceString();
 
+    int getThreadTimeInUsec();
+
 }
