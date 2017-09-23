@@ -35,11 +35,13 @@ class TraceThreadInfo implements ThreadInfo {
 
     List<MethodCallNode> list;
     Stack<TraceRecord> stack;
+    int lastExitDeltaTimeInUsec;
 
     MethodCallNode[] getNodes() {
         MethodCallNode[] nodes = list == null ? null : list.toArray(new MethodCallNode[0]);
         list = null;
         stack = null;
+        lastExitDeltaTimeInUsec = 0;
         return nodes;
     }
 
@@ -50,4 +52,5 @@ class TraceThreadInfo implements ThreadInfo {
                 ", threadName='" + threadName + '\'' +
                 '}';
     }
+
 }
