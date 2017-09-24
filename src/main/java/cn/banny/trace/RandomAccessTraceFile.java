@@ -45,10 +45,10 @@ class RandomAccessTraceFile implements TraceFile {
         }
     }
 
-    synchronized void getMethodCallNodes(Map<Integer, TraceThreadInfo> threadMap, long offset, TraceRecord parent) throws IOException {
+    synchronized void readMethodCallNodes(Map<Integer, TraceThreadInfo> threadMap, long offset, TraceRecord parent) throws IOException {
         traceFile.seek(offset);
 
-        long length = traceFile.length();
+        final long length = traceFile.length();
         while (traceFile.getFilePointer() + recordSize < length) {
             TraceRecord record = readRecord(threadMap);
 
@@ -58,8 +58,8 @@ class RandomAccessTraceFile implements TraceFile {
             }
 
             if (threadInfo.list == null || threadInfo.stack == null) {
-                threadInfo.list = new ArrayList<MethodCallNode>();
-                threadInfo.stack = new Stack<TraceRecord>();
+                threadInfo.list = new ArrayList<>();
+                threadInfo.stack = new Stack<>();
 
                 if (parent == null) {
                     threadInfo.stack.push(null);
@@ -156,8 +156,8 @@ class RandomAccessTraceFile implements TraceFile {
             this.clockCallOverheadInNsec = clockCallOverheadInNsec;
             this.vm = vm;
 
-            List<ThreadInfo> threadInfoList = new ArrayList<ThreadInfo>();
-            Map<Integer, TraceThreadInfo> threadMap = new HashMap<Integer, TraceThreadInfo>();
+            List<ThreadInfo> threadInfoList = new ArrayList<>();
+            Map<Integer, TraceThreadInfo> threadMap = new HashMap<>();
             while (!"*methods".equals(line = randomAccessFile.readLine())) {
                 int index = line.indexOf('\t');
                 if (index != -1) {
@@ -170,7 +170,7 @@ class RandomAccessTraceFile implements TraceFile {
             }
             this.threadInfos = Collections.unmodifiableList(threadInfoList);
 
-            Map<Integer, MethodSpec> methodMap = new HashMap<Integer, MethodSpec>();
+            Map<Integer, MethodSpec> methodMap = new HashMap<>();
             while (!"*end".equals(line = randomAccessFile.readLine())) {
                 String[] values = line.split("\t");
                 if (values.length != 6) {
@@ -204,14 +204,11 @@ class RandomAccessTraceFile implements TraceFile {
 
             this.traceFile = randomAccessFile;
 
-            getMethodCallNodes(threadMap, pos + offset, null);
+            readMethodCallNodes(threadMap, pos + offset, null);
             for (TraceThreadInfo threadInfo : threadMap.values()) {
                 threadInfo.setTop(threadInfo.getNodes());
             }
-        } catch (IOException e) {
-            TraceReader.closeQuietly(randomAccessFile);
-            throw e;
-        } catch (RuntimeException e) {
+        } catch (IOException | RuntimeException e) {
             TraceReader.closeQuietly(randomAccessFile);
             throw e;
         }

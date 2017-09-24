@@ -1,6 +1,5 @@
 package cn.banny.trace;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Stack;
 
@@ -29,7 +28,8 @@ class TraceThreadInfo implements ThreadInfo {
         this.top = top;
     }
 
-    public MethodCallNode[] getTop() throws IOException {
+    @Override
+    public MethodCallNode[] getChildren() {
         return top;
     }
 
@@ -47,10 +47,17 @@ class TraceThreadInfo implements ThreadInfo {
 
     @Override
     public String toString() {
-        return "TraceThreadInfo{" +
-                "threadId=" + threadId +
-                ", threadName='" + threadName + '\'' +
-                '}';
+        StringBuilder sb = new StringBuilder();
+        sb.append(threadId);
+        while (sb.length() < 4) {
+            sb.insert(0, ' ');
+        }
+        sb.append(" - ").append(threadName);
+        return sb.toString();
     }
 
+    @Override
+    public String getStackTraceString() {
+        return toString();
+    }
 }

@@ -24,11 +24,11 @@ public class TraceFileTest extends TestCase {
 
         System.out.println();
         for (ThreadInfo threadInfo : traceFile.getThreads()) {
-            if (threadInfo.getTop() != null) {
-                assertTrue("top is empty: " + threadInfo, threadInfo.getTop().length > 0);
+            if (threadInfo.getChildren() != null) {
+                assertTrue("top is empty: " + threadInfo, threadInfo.getChildren().length > 0);
 
                 if (threadInfo.getThreadId() == 10) {
-                    dumpChildren(threadInfo.getTop(), "+");
+                    dumpChildren(threadInfo.getChildren(), "+");
                 }
             }
         }
@@ -59,4 +59,5 @@ public class TraceFileTest extends TestCase {
         TraceReader.closeQuietly(traceFile);
         System.out.println("offset=" + (System.currentTimeMillis() - startTime));
     }
+
 }

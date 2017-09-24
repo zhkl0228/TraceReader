@@ -10,6 +10,7 @@ public class TraceMethodCallNode implements MethodCallNode {
     private final RandomAccessTraceFile traceFile;
     private final int threadTimeInUsec;
     private final MethodSpec method;
+    private final int methodId;
 
     TraceMethodCallNode(TraceRecord record, RandomAccessTraceFile traceFile, int threadTimeInUsec) {
         this.threadInfo = record.getThreadInfo();
@@ -17,6 +18,7 @@ public class TraceMethodCallNode implements MethodCallNode {
         this.traceFile = traceFile;
         this.threadTimeInUsec = threadTimeInUsec;
         this.method = traceFile.methodMap.get(record.getMethodId());
+        this.methodId = record.getMethodId();
     }
 
     @Override
@@ -33,9 +35,21 @@ public class TraceMethodCallNode implements MethodCallNode {
         return parent.toMethodCallNode();
     }
 
-    public MethodCallNode[] getChildren() throws IOException {
-        traceFile.getMethodCallNodes(Collections.singletonMap(threadInfo.getThreadId(), threadInfo), record.getFilePointer(), record);
-        return threadInfo.getNodes();
+    private MethodCallNode[] children;
+
+    public synchronized MethodCallNode[] getChildren() {
+        if (children != null) {
+            return children;
+        }
+        try {
+            traceFile.readMethodCallNodes(Collections.singletonMap(threadInfo.getThreadId(), threadInfo), record.getFilePointer(), record);
+            children = threadInfo.getNodes();
+            return children;
+        } catch (IOException e) {
+            e.printStackTrace();
+            children = new MethodCallNode[0];
+            return children;
+        }
     }
 
     public MethodSpec getMethod() {
@@ -44,12 +58,12 @@ public class TraceMethodCallNode implements MethodCallNode {
 
     public String getStackTraceString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(threadInfo.getThreadName()).append(": ").append(record).append("\n");
+        sb.append(threadInfo.getThreadId()).append(" - ").append(threadInfo.getThreadName()).append("\n");
         MethodCallNode node = this;
         do {
             MethodSpec method = node.getMethod();
             if (method != null) {
-                sb.append("\tat ").append(method.getClassName().replace('/', '.')).append(".");
+                sb.append("    at ").append(method.getClassName().replace('/', '.')).append(".");
                 sb.append(method.getMethodName()).append(method.getParameters());
                 sb.append(" [").append(method.getSource()).append(":").append(method.getLine()).append("] {").append(node.getThreadTimeInUsec()).append("us}\n");
             }
@@ -59,6 +73,9 @@ public class TraceMethodCallNode implements MethodCallNode {
 
     @Override
     public String toString() {
-        return getStackTraceString();
+        if (method == null) {
+            return "0x" + Integer.toHexString(methodId);
+        }
+        return method.toString();
     }
 }
