@@ -1,6 +1,4 @@
-package cn.banny.trace;
-
-import cn.banny.trace.ui.TraceFrame;
+package cn.banny.trace.ui;
 
 import javax.swing.*;
 
@@ -10,7 +8,7 @@ public class Main {
         String lookAndFeel = UIManager.getSystemLookAndFeelClassName();
         UIManager.setLookAndFeel(lookAndFeel);
 
-        new TraceFrame(Main.class.getSimpleName());
+        new TraceFrame("Trace文件分析工具");
     }
 
 }

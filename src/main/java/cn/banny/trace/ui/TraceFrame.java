@@ -3,9 +3,9 @@ package cn.banny.trace.ui;
 import javax.swing.*;
 import java.awt.*;
 
-public class TraceFrame extends JFrame {
+class TraceFrame extends JFrame {
 
-    public TraceFrame(String title) throws HeadlessException {
+    TraceFrame(String title) throws HeadlessException {
         super(title);
 
         setLayout(new BorderLayout());
@@ -13,14 +13,13 @@ public class TraceFrame extends JFrame {
 
         Toolkit toolkit = this.getToolkit();
         Dimension screenSize = toolkit.getScreenSize();
-        this.setSize(screenSize);
-        this.setResizable(false);
 
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
         add(tabbedPane, BorderLayout.CENTER);
 
         setJMenuBar(new TraceMenuBar(tabbedPane, screenSize));
 
+        setExtendedState(Frame.MAXIMIZED_BOTH);
         setVisible(true);
     }
 

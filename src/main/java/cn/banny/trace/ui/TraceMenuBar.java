@@ -34,7 +34,7 @@ class TraceMenuBar extends JMenuBar {
                 fileChooser.setFileFilter(new FileFilter() {
                     @Override
                     public boolean accept(File f) {
-                        return "trace".equalsIgnoreCase(FilenameUtils.getExtension(f.getName()));
+                        return f.isDirectory() || "trace".equalsIgnoreCase(FilenameUtils.getExtension(f.getName()));
                     }
                     @Override
                     public String getDescription() {
@@ -58,11 +58,10 @@ class TraceMenuBar extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Component selected = tabbedPane.getSelectedComponent();
+                if (selected instanceof Closeable) {
+                    IOUtils.closeQuietly((Closeable) selected);
+                }
                 if (selected != null) {
-                    if (selected instanceof Closeable) {
-                        IOUtils.closeQuietly((Closeable) selected);
-                    }
-
                     tabbedPane.remove(selected);
                 }
             }

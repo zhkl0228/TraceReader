@@ -58,6 +58,6 @@ class TraceThreadInfo implements ThreadInfo {
 
     @Override
     public String getStackTraceString() {
-        return toString();
+        return toString().trim();
     }
 }
