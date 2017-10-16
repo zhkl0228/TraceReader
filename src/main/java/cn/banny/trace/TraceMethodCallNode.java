@@ -1,13 +1,9 @@
 package cn.banny.trace;
 
-import java.io.IOException;
-import java.util.Collections;
-
 public class TraceMethodCallNode implements MethodCallNode {
 
     private final TraceThreadInfo threadInfo;
     private final TraceRecord record;
-    private final RandomAccessTraceFile traceFile;
     private final int threadTimeInUsec;
     private final MethodSpec method;
     private final int methodId;
@@ -15,7 +11,6 @@ public class TraceMethodCallNode implements MethodCallNode {
     TraceMethodCallNode(TraceRecord record, RandomAccessTraceFile traceFile, int threadTimeInUsec) {
         this.threadInfo = record.getThreadInfo();
         this.record = record;
-        this.traceFile = traceFile;
         this.threadTimeInUsec = threadTimeInUsec;
         this.method = traceFile.methodMap.get(record.getMethodId());
         this.methodId = record.getMethodId();
@@ -35,21 +30,13 @@ public class TraceMethodCallNode implements MethodCallNode {
         return parent.toMethodCallNode();
     }
 
-    private MethodCallNode[] children;
-
     public synchronized MethodCallNode[] getChildren() {
-        if (children != null) {
-            return children;
+        Record[] children = record.getChildren();
+        MethodCallNode[] nodes = new MethodCallNode[children.length];
+        for(int i = 0; i < children.length; i++) {
+            nodes[i] = children[i].toMethodCallNode();
         }
-        try {
-            traceFile.readMethodCallNodes(Collections.singletonMap(threadInfo.getThreadId(), threadInfo), record.getFilePointer(), record);
-            children = threadInfo.getNodes();
-            return children;
-        } catch (IOException e) {
-            e.printStackTrace();
-            children = new MethodCallNode[0];
-            return children;
-        }
+        return nodes;
     }
 
     public MethodSpec getMethod() {

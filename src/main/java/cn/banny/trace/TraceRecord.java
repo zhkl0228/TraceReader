@@ -1,5 +1,8 @@
 package cn.banny.trace;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TraceRecord implements Record {
 
     private final long filePointer;
@@ -56,16 +59,26 @@ public class TraceRecord implements Record {
         this.wallTimeInUsec = wallTimeInUsec;
     }
 
-    private Record parent;
+    private TraceRecord parent;
 
     @Override
     public Record getParent() {
         return parent;
     }
 
-    void setParent(Record parent) {
-        this.parent = parent;
+    @Override
+    public Record[] getChildren() {
+        return children.toArray(new Record[0]);
     }
+
+    void setParent(TraceRecord parent) {
+        this.parent = parent;
+        if (parent != null) {
+            parent.children.add(this);
+        }
+    }
+
+    private final List<TraceRecord> children = new ArrayList<>();
 
     private int threadTimeInUsec;
 

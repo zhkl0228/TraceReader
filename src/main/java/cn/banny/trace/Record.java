@@ -18,6 +18,8 @@ public interface Record {
 
     Record getParent();
 
+    Record[] getChildren();
+
     MethodCallNode toMethodCallNode();
 
 }

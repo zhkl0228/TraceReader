@@ -45,7 +45,7 @@ class RandomAccessTraceFile implements TraceFile {
         }
     }
 
-    synchronized void readMethodCallNodes(Map<Integer, TraceThreadInfo> threadMap, long offset, TraceRecord parent) throws IOException {
+    private synchronized void readMethodCallNodes(Map<Integer, TraceThreadInfo> threadMap, long offset) throws IOException {
         traceFile.seek(offset);
 
         final long length = traceFile.length();
@@ -61,19 +61,19 @@ class RandomAccessTraceFile implements TraceFile {
                 threadInfo.list = new ArrayList<>();
                 threadInfo.stack = new Stack<>();
 
-                if (parent == null) {
-                    threadInfo.stack.push(null);
-                }
+                threadInfo.stack.push(null);
             }
 
             if (record.getMethodAction() == MethodAction.ENTER) {
                 if (!threadInfo.stack.isEmpty()) {
                     record.setParent(threadInfo.stack.peek());
-                } else if(parent != null) {
-                    record = parent;
                 }
                 threadInfo.stack.push(record);
             } else {
+                if (threadInfo.stack.peek() == null) {
+                    continue;
+                }
+
                 TraceRecord exit = threadInfo.stack.pop();
                 if (exit.getMethodId() != record.getMethodId()) {
                     throw new IllegalStateException("exit method invalid: record=" + record + ", exit=" + exit);
@@ -204,7 +204,7 @@ class RandomAccessTraceFile implements TraceFile {
 
             this.traceFile = randomAccessFile;
 
-            readMethodCallNodes(threadMap, pos + offset, null);
+            readMethodCallNodes(threadMap, pos + offset);
             for (TraceThreadInfo threadInfo : threadMap.values()) {
                 threadInfo.setTop(threadInfo.getNodes());
             }
