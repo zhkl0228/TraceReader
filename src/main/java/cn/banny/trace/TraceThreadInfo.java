@@ -60,4 +60,9 @@ class TraceThreadInfo implements ThreadInfo {
     public String getStackTraceString() {
         return toString().trim();
     }
+
+    @Override
+    public boolean matchesStackElement(String keywords) {
+        return false;
+    }
 }

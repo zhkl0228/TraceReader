@@ -25,6 +25,11 @@ public class SelectThreadInfo implements ThreadInfo {
     }
 
     @Override
+    public boolean matchesStackElement(String keywords) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String toString() {
         return "选择线程";
     }

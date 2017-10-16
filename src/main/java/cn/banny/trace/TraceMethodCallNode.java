@@ -59,6 +59,26 @@ public class TraceMethodCallNode implements MethodCallNode {
     }
 
     @Override
+    public boolean matchesStackElement(String keywords) {
+        if (keywords == null) {
+            throw new NullPointerException("keywords is null");
+        }
+
+        MethodCallNode node = this;
+        do {
+            MethodSpec method = node.getMethod();
+            if (method != null) {
+                String className = method.getClassName().replace('/', '.');
+                String methodName = method.getMethodName();
+                if (keywords.equals(className) || keywords.equals(methodName)) {
+                    return true;
+                }
+            }
+        } while ((node = node.getParent()) != null);
+        return false;
+    }
+
+    @Override
     public String toString() {
         if (method == null) {
             return "0x" + Integer.toHexString(methodId);
