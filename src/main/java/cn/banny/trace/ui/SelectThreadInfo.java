@@ -25,7 +25,7 @@ public class SelectThreadInfo implements ThreadInfo {
     }
 
     @Override
-    public boolean matchesStackElement(String keywords) {
+    public boolean matchesStackElement(String keywords, boolean exact) {
         throw new UnsupportedOperationException();
     }
 

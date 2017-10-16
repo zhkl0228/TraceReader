@@ -4,7 +4,7 @@ public interface CallNode {
 
     String getStackTraceString();
 
-    boolean matchesStackElement(String keywords);
+    boolean matchesStackElement(String keywords, boolean exact);
 
     MethodCallNode[] getChildren();
 

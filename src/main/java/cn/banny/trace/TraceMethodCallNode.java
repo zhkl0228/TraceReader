@@ -59,7 +59,7 @@ public class TraceMethodCallNode implements MethodCallNode {
     }
 
     @Override
-    public boolean matchesStackElement(String keywords) {
+    public boolean matchesStackElement(String keywords, boolean exact) {
         if (keywords == null) {
             throw new NullPointerException("keywords is null");
         }
@@ -67,10 +67,20 @@ public class TraceMethodCallNode implements MethodCallNode {
         MethodCallNode node = this;
         do {
             MethodSpec method = node.getMethod();
-            if (method != null) {
-                String className = method.getClassName().replace('/', '.');
-                String methodName = method.getMethodName();
-                if (keywords.equals(className) || keywords.equals(methodName)) {
+            if (method == null) {
+                continue;
+            }
+
+            String className = method.getClassName().replace('/', '.');
+            String methodName = method.getMethodName();
+            String fullName = className + "." + methodName;
+            if (exact) {
+                if (keywords.equals(className) || keywords.equals(methodName) ||
+                        keywords.equals(fullName)) {
+                    return true;
+                }
+            } else {
+                if (fullName.contains(keywords)) {
                     return true;
                 }
             }
