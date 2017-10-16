@@ -56,7 +56,7 @@ public class TraceFileTest extends TestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
 
-        TraceReader.closeQuietly(traceFile);
+        traceFile = null;
         System.out.println("offset=" + (System.currentTimeMillis() - startTime));
     }
 

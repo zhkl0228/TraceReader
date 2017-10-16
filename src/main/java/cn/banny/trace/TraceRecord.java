@@ -5,7 +5,6 @@ import java.util.List;
 
 public class TraceRecord implements Record {
 
-    private final long filePointer;
     private final int threadId;
     private final int methodId;
     private final MethodAction methodAction;
@@ -13,8 +12,7 @@ public class TraceRecord implements Record {
     private final TraceThreadInfo threadInfo;
     private final RandomAccessTraceFile traceFile;
 
-    TraceRecord(long filePointer, int threadId, int methodId, MethodAction methodAction, int deltaTimeInUsec, TraceThreadInfo threadInfo, RandomAccessTraceFile traceFile) {
-        this.filePointer = filePointer;
+    TraceRecord(int threadId, int methodId, MethodAction methodAction, int deltaTimeInUsec, TraceThreadInfo threadInfo, RandomAccessTraceFile traceFile) {
         this.threadId = threadId;
         this.methodId = methodId;
         this.methodAction = methodAction;
@@ -22,10 +20,6 @@ public class TraceRecord implements Record {
 
         this.threadInfo = threadInfo;
         this.traceFile = traceFile;
-    }
-
-    public long getFilePointer() {
-        return filePointer;
     }
 
     public int getThreadId() {
@@ -89,8 +83,7 @@ public class TraceRecord implements Record {
     @Override
     public String toString() {
         return "Record{" +
-                "filePointer=" + filePointer +
-                ", threadId=" + threadId +
+                "threadId=" + threadId +
                 ", methodId=0x" + Integer.toHexString(methodId) +
                 ", methodAction=" + methodAction +
                 '}';

@@ -21,12 +21,9 @@ class RandomAccessTraceFile implements TraceFile {
     private final long startTimeInUsec;
     private final int recordSize;
 
-    private final RandomAccessFile traceFile;
-
     private static final int kTraceMethodActionMask = 0x3;
 
-    private TraceRecord readRecord(Map<Integer, TraceThreadInfo> threadMap) throws IOException {
-        long filePointer = traceFile.getFilePointer();
+    private TraceRecord readRecord(RandomAccessFile traceFile, Map<Integer, TraceThreadInfo> threadMap) throws IOException {
         switch (version) {
             case 3:
                 int threadId = Short.reverseBytes(traceFile.readShort()) & 0xffff;
@@ -35,7 +32,7 @@ class RandomAccessTraceFile implements TraceFile {
                 int wallTimeInUsec = Integer.reverseBytes(traceFile.readInt());
 
                 TraceThreadInfo threadInfo = threadMap.get(threadId);
-                TraceRecord record = new TraceRecord(filePointer, threadId, method & ~kTraceMethodActionMask, MethodAction.decodeAction(method & kTraceMethodActionMask), deltaTimeInUsec, threadInfo, this);
+                TraceRecord record = new TraceRecord(threadId, method & ~kTraceMethodActionMask, MethodAction.decodeAction(method & kTraceMethodActionMask), deltaTimeInUsec, threadInfo, this);
                 record.setWallTimeInUsec(wallTimeInUsec);
                 return record;
             case 1:
@@ -45,12 +42,10 @@ class RandomAccessTraceFile implements TraceFile {
         }
     }
 
-    private synchronized void readMethodCallNodes(Map<Integer, TraceThreadInfo> threadMap, long offset) throws IOException {
-        traceFile.seek(offset);
-
+    private synchronized void readMethodCallNodes(RandomAccessFile traceFile, Map<Integer, TraceThreadInfo> threadMap) throws IOException {
         final long length = traceFile.length();
         while (traceFile.getFilePointer() + recordSize < length) {
-            TraceRecord record = readRecord(threadMap);
+            TraceRecord record = readRecord(traceFile, threadMap);
 
             TraceThreadInfo threadInfo = record.getThreadInfo();
             if (threadInfo == null) {
@@ -202,15 +197,16 @@ class RandomAccessTraceFile implements TraceFile {
             this.startTimeInUsec = Long.reverseBytes(randomAccessFile.readLong()) & 0x7fffffffffffffffL;
             this.recordSize = version >= 2 ? Short.reverseBytes(randomAccessFile.readShort()) & 0xffff : 10;
 
-            this.traceFile = randomAccessFile;
-
-            readMethodCallNodes(threadMap, pos + offset);
+            randomAccessFile.seek(pos + offset);
+            readMethodCallNodes(randomAccessFile, threadMap);
             for (TraceThreadInfo threadInfo : threadMap.values()) {
                 threadInfo.setTop(threadInfo.getNodes());
             }
         } catch (IOException | RuntimeException e) {
             TraceReader.closeQuietly(randomAccessFile);
             throw e;
+        } finally {
+            TraceReader.closeQuietly(randomAccessFile);
         }
     }
 
@@ -244,10 +240,6 @@ class RandomAccessTraceFile implements TraceFile {
 
     public long getStartTimeInUsec() {
         return startTimeInUsec;
-    }
-
-    public void close() throws IOException {
-        TraceReader.closeQuietly(traceFile);
     }
 
 }

@@ -14,8 +14,6 @@ public interface Record {
 
     int getWallTimeInUsec();
 
-    long getFilePointer();
-
     Record getParent();
 
     Record[] getChildren();

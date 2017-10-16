@@ -1,10 +1,8 @@
 package cn.banny.trace;
 
-import java.io.Closeable;
 import java.util.List;
-import java.util.Map;
 
-public interface TraceFile extends Closeable {
+public interface TraceFile {
 
     boolean isDataFileOverflow();
 

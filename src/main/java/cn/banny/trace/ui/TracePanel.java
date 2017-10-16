@@ -7,17 +7,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.Closeable;
-import java.io.IOException;
 
-class TracePanel extends JPanel implements Closeable {
-
-    private TraceFile traceFile;
+class TracePanel extends JPanel {
 
     TracePanel(TraceFile traceFile, final Dimension screenSize) {
         super(new BorderLayout());
-
-        this.traceFile = traceFile;
 
         final JSplitPane splitPane = new JSplitPane();
         splitPane.setDividerLocation(screenSize.width - 600);
@@ -47,10 +41,5 @@ class TracePanel extends JPanel implements Closeable {
         });
         threads.setSelectedIndex(0);
         this.add(threads, BorderLayout.NORTH);
-    }
-
-    @Override
-    public void close() throws IOException {
-        traceFile.close();
     }
 }
