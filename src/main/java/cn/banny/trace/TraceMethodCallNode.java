@@ -8,11 +8,11 @@ public class TraceMethodCallNode implements MethodCallNode {
     private final MethodSpec method;
     private final int methodId;
 
-    TraceMethodCallNode(TraceRecord record, RandomAccessTraceFile traceFile, int threadTimeInUsec) {
+    TraceMethodCallNode(TraceRecord record, MethodSpec method, int threadTimeInUsec) {
         this.threadInfo = record.getThreadInfo();
         this.record = record;
         this.threadTimeInUsec = threadTimeInUsec;
-        this.method = traceFile.methodMap.get(record.getMethodId());
+        this.method = method;
         this.methodId = record.getMethodId();
     }
 

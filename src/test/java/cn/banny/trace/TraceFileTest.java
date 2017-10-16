@@ -46,7 +46,7 @@ public class TraceFileTest extends TestCase {
             dumpChildren(children, " " + prefix);
 
             if (children == null || children.length < 1) {
-                System.out.println("matches createFromParcel: " + node.matchesStackElement("createFromParcel", false));
+                System.out.println("matchesStackElement createFromParcel: " + node.matchesStackElement("createFromParcel", false));
                 System.out.println(node.getStackTraceString());
             }
         }

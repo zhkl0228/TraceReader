@@ -2,6 +2,7 @@ package cn.banny.trace;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class TraceRecord implements Record {
 
@@ -10,16 +11,16 @@ public class TraceRecord implements Record {
     private final MethodAction methodAction;
     private final int deltaTimeInUsec;
     private final TraceThreadInfo threadInfo;
-    private final RandomAccessTraceFile traceFile;
+    private final MethodSpec method;
 
-    TraceRecord(int threadId, int methodId, MethodAction methodAction, int deltaTimeInUsec, TraceThreadInfo threadInfo, RandomAccessTraceFile traceFile) {
+    TraceRecord(int threadId, int methodId, MethodAction methodAction, int deltaTimeInUsec, TraceThreadInfo threadInfo, Map<Integer, MethodSpec> methodMap) {
         this.threadId = threadId;
         this.methodId = methodId;
         this.methodAction = methodAction;
         this.deltaTimeInUsec = deltaTimeInUsec;
 
         this.threadInfo = threadInfo;
-        this.traceFile = traceFile;
+        this.method = methodMap.get(methodId);
     }
 
     public int getThreadId() {
@@ -91,6 +92,6 @@ public class TraceRecord implements Record {
 
     @Override
     public MethodCallNode toMethodCallNode() {
-        return new TraceMethodCallNode(this, traceFile, threadTimeInUsec);
+        return new TraceMethodCallNode(this, method, threadTimeInUsec);
     }
 }
