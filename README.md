@@ -8,12 +8,10 @@ Usage: <br/>
 <code>
 TraceFile traceFile = TraceReader.parseTraceFile(new File("src/test/resources/test.trace"));
 
-<br />
 for (ThreadInfo threadInfo : traceFile.getThreads()) {
     processCallNode(threadInfo, threadInfo.getChildren(), "createFromParcel");
 }
 
-<br />
 void processCallNode(CallNode node, MethodCallNode[] children, String keywords) {
     if (children.length < 1) { // leaf
         if (node.matchesStackElement(keywords, true)) {
