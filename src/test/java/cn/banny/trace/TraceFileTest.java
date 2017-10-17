@@ -2,23 +2,44 @@ package cn.banny.trace;
 
 import junit.framework.TestCase;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 public class TraceFileTest extends TestCase {
 
-    private long startTime;
-    private TraceFile traceFile;
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        startTime = System.currentTimeMillis();
-        traceFile = TraceReader.parseTraceFile(new File("src/test/resources/test.trace"));
+    public void testParseFile() throws Exception {
+        long startTime = System.currentTimeMillis();
+        TraceFile traceFile = TraceReader.parseTraceFile(new File("src/test/resources/test.trace"));
+        doTestTraceFile(traceFile, true);
+        System.out.println("testParseFile offset=" + (System.currentTimeMillis() - startTime));
     }
 
-    public void testParse() throws Exception {
+    public void testParseBufferedInputStream() throws Exception {
+        long startTime = System.currentTimeMillis();
+        InputStream inputStream = null;
+        try {
+            inputStream = new BufferedInputStream(new FileInputStream(new File("src/test/resources/test.trace")));
+            TraceFile traceFile = TraceReader.parseTraceFile(inputStream);
+            doTestTraceFile(traceFile, false);
+            System.out.println("testParseBufferedInputStream offset=" + (System.currentTimeMillis() - startTime));
+        } finally {
+            TraceReader.closeQuietly(inputStream);
+        }
+    }
+
+    public void testParseFileInputStream() throws Exception {
+        long startTime = System.currentTimeMillis();
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(new File("src/test/resources/test.trace"));
+            TraceFile traceFile = TraceReader.parseTraceFile(inputStream);
+            doTestTraceFile(traceFile, false);
+            System.out.println("testParseFileInputStream offset=" + (System.currentTimeMillis() - startTime));
+        } finally {
+            TraceReader.closeQuietly(inputStream);
+        }
+    }
+
+    private void doTestTraceFile(TraceFile traceFile, boolean exact) throws IOException {
         assertFalse(traceFile.getThreads().isEmpty());
         assertTrue(traceFile.getNumMethodCalls() > 0);
 
@@ -28,13 +49,13 @@ public class TraceFileTest extends TestCase {
                 assertTrue("top is empty: " + threadInfo, threadInfo.getChildren().length > 0);
 
                 if (threadInfo.getThreadId() == 10) {
-                    dumpChildren(threadInfo.getChildren(), "+");
+                    dumpChildren(threadInfo.getChildren(), "+", exact);
                 }
             }
         }
     }
 
-    private void dumpChildren(MethodCallNode[] nodes, String prefix) throws IOException {
+    private void dumpChildren(MethodCallNode[] nodes, String prefix, boolean exact) throws IOException {
         if (nodes == null) {
             return;
         }
@@ -43,21 +64,13 @@ public class TraceFileTest extends TestCase {
             System.out.println(prefix + node.getMethod());
 
             MethodCallNode[] children = node.getChildren();
-            dumpChildren(children, " " + prefix);
+            dumpChildren(children, " " + prefix, exact);
 
             if (children == null || children.length < 1) {
-                System.out.println("matchesStackElement createFromParcel: " + node.matchesStackElement("createFromParcel", false));
+                System.out.println("matchesStackElement createFromParcel: " + node.matchesStackElement("createFromParcel", exact));
                 System.out.println(node.getStackTraceString());
             }
         }
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-
-        traceFile = null;
-        System.out.println("offset=" + (System.currentTimeMillis() - startTime));
     }
 
 }

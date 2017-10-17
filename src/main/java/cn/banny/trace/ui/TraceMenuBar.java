@@ -2,8 +2,6 @@ package cn.banny.trace.ui;
 
 import cn.banny.trace.TraceFile;
 import cn.banny.trace.TraceReader;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -34,7 +32,7 @@ class TraceMenuBar extends JMenuBar {
                 fileChooser.setFileFilter(new FileFilter() {
                     @Override
                     public boolean accept(File f) {
-                        return f.isDirectory() || "trace".equalsIgnoreCase(FilenameUtils.getExtension(f.getName()));
+                        return f.isDirectory() || "trace".equalsIgnoreCase(TraceReader.getExtension(f.getName()));
                     }
                     @Override
                     public String getDescription() {
@@ -59,7 +57,7 @@ class TraceMenuBar extends JMenuBar {
             public void actionPerformed(ActionEvent e) {
                 Component selected = tabbedPane.getSelectedComponent();
                 if (selected instanceof Closeable) {
-                    IOUtils.closeQuietly((Closeable) selected);
+                    TraceReader.closeQuietly((Closeable) selected);
                 }
                 if (selected != null) {
                     tabbedPane.remove(selected);
@@ -74,7 +72,7 @@ class TraceMenuBar extends JMenuBar {
     private void openTraceFile(JTabbedPane tabbedPane, Dimension screenSize, File file) {
         try {
             TraceFile traceFile = TraceReader.parseTraceFile(file);
-            tabbedPane.addTab(FilenameUtils.getBaseName(file.getName()), new TracePanel(traceFile, screenSize));
+            tabbedPane.addTab(TraceReader.getBaseName(file.getName()), new TracePanel(traceFile, screenSize));
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "打开trace文件出错", JOptionPane.ERROR_MESSAGE);
         }
