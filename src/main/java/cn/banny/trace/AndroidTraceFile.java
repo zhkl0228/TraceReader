@@ -137,6 +137,7 @@ class AndroidTraceFile implements TraceFile {
                 threadMap.put(threadId, threadInfo);
             }
         }
+        Collections.sort(threadInfoList);
         this.threadInfos = Collections.unmodifiableList(threadInfoList);
 
         Map<Integer, MethodSpec> methodMap = new HashMap<>();

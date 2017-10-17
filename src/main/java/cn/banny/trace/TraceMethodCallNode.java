@@ -80,7 +80,7 @@ public class TraceMethodCallNode implements MethodCallNode {
                     return true;
                 }
             } else {
-                if (fullName.contains(keywords)) {
+                if (fullName.toLowerCase().contains(keywords.toLowerCase())) {
                     return true;
                 }
             }

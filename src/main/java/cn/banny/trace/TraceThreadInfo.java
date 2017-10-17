@@ -65,4 +65,9 @@ class TraceThreadInfo implements ThreadInfo {
     public boolean matchesStackElement(String keywords, boolean exact) {
         return false;
     }
+
+    @Override
+    public int compareTo(ThreadInfo o) {
+        return threadId - o.getThreadId();
+    }
 }

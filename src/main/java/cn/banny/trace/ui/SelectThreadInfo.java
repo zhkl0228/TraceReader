@@ -33,4 +33,9 @@ public class SelectThreadInfo implements ThreadInfo {
     public String toString() {
         return "选择线程";
     }
+
+    @Override
+    public int compareTo(ThreadInfo o) {
+        return getThreadId() - o.getThreadId();
+    }
 }
