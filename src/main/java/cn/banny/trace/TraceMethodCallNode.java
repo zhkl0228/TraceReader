@@ -45,14 +45,14 @@ public class TraceMethodCallNode implements MethodCallNode {
 
     public String getStackTraceString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(threadInfo.getThreadId()).append(" - ").append(threadInfo.getThreadName()).append("\n");
+        sb.append("Thread: ").append(threadInfo.getThreadName()).append("\n");
         MethodCallNode node = this;
         do {
             MethodSpec method = node.getMethod();
             if (method != null) {
                 sb.append("    at ").append(method.getClassName().replace('/', '.')).append(".");
-                sb.append(method.getMethodName()).append(method.getParameters());
-                sb.append(" [").append(method.getSource()).append(":").append(method.getLine()).append("] {").append(node.getThreadTimeInUsec()).append("us}\n");
+                sb.append(method.getMethodName()).append(method.getSignature());
+                sb.append(" [").append(method.getPathname()).append(":").append(method.getLineNumber()).append("] {").append(node.getThreadTimeInUsec()).append("us}\n");
             }
         } while ((node = node.getParent()) != null);
         return sb.toString();

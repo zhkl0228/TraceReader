@@ -1,6 +1,6 @@
 package cn.banny.trace;
 
-public interface ThreadInfo extends CallNode, Comparable<ThreadInfo> {
+public interface ThreadInfo extends CallNode {
 
     int getThreadId();
 

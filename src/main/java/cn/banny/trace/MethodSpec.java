@@ -4,16 +4,16 @@ class MethodSpec {
 
     private final String className;
     private final String methodName;
-    private final String parameters;
-    private final String source;
-    private final int line;
+    private final String signature;
+    private final String pathname;
+    private final int lineNumber;
 
-    MethodSpec(String className, String methodName, String parameters, String source, int line) {
+    MethodSpec(String className, String methodName, String signature, String pathname, int lineNumber) {
         this.className = className;
         this.methodName = methodName;
-        this.parameters = parameters;
-        this.source = source;
-        this.line = line;
+        this.signature = signature;
+        this.pathname = pathname;
+        this.lineNumber = lineNumber;
     }
 
     String getClassName() {
@@ -24,20 +24,20 @@ class MethodSpec {
         return methodName;
     }
 
-    String getParameters() {
-        return parameters;
+    String getSignature() {
+        return signature;
     }
 
-    String getSource() {
-        return source;
+    String getPathname() {
+        return pathname;
     }
 
-    int getLine() {
-        return line;
+    int getLineNumber() {
+        return lineNumber;
     }
 
     @Override
     public String toString() {
-        return className + "." + methodName + parameters + " (" + source + ":" + line + ")";
+        return className + "." + methodName + signature + " (" + pathname + ":" + lineNumber + ")";
     }
 }

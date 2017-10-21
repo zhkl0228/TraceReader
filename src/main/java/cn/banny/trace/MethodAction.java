@@ -2,11 +2,11 @@ package cn.banny.trace;
 
 public enum MethodAction {
 
-    ENTER,
+    METHOD_TRACE_ENTER, // method entry
 
-    EXIT,
+    METHOD_TRACE_EXIT, // method exit
 
-    EXCEPTION;
+    METHOD_TRACE_UNROLL; // method exited by exception unrolling
 
     public static MethodAction decodeAction(int value) {
         for (MethodAction action : MethodAction.values()) {

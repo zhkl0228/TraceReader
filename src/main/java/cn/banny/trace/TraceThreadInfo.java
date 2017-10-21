@@ -30,7 +30,7 @@ class TraceThreadInfo implements ThreadInfo {
 
     @Override
     public MethodCallNode[] getChildren() {
-        return top;
+        return top == null ? new MethodCallNode[0] : top;
     }
 
     List<MethodCallNode> list;
@@ -64,10 +64,5 @@ class TraceThreadInfo implements ThreadInfo {
     @Override
     public boolean matchesStackElement(String keywords, boolean exact) {
         return false;
-    }
-
-    @Override
-    public int compareTo(ThreadInfo o) {
-        return threadId - o.getThreadId();
     }
 }

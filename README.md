@@ -7,22 +7,6 @@ Usage: <br/>
 <pre>
 <code>
 TraceFile traceFile = TraceReader.parseTraceFile(new File("src/test/resources/test.trace"));
-
-for (ThreadInfo threadInfo : traceFile.getThreads()) {
-    processCallNode(threadInfo, threadInfo.getChildren(), "createFromParcel");
-}
-
-void processCallNode(CallNode node, MethodCallNode[] children, String keywords) {
-    if (children.length < 1) { // leaf
-        if (node.matchesStackElement(keywords, true)) {
-            System.out.println(node.getStackTraceString());
-        }
-        return;
-    }
-
-    for (MethodCallNode child : children) {
-        processCallNode(child, child.getChildren(), keywords);
-    }
-}
+traceFile.dumpStackTrace(System.out, "createFromParcel");
 </code>
 </pre>

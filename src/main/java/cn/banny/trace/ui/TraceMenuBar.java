@@ -32,7 +32,7 @@ class TraceMenuBar extends JMenuBar {
                 fileChooser.setFileFilter(new FileFilter() {
                     @Override
                     public boolean accept(File f) {
-                        return f.isDirectory() || "trace".equalsIgnoreCase(TraceReader.getExtension(f.getName()));
+                        return f.isDirectory() || "trace".equalsIgnoreCase(FilenameUtils.getExtension(f.getName()));
                     }
                     @Override
                     public String getDescription() {
@@ -72,7 +72,7 @@ class TraceMenuBar extends JMenuBar {
     private void openTraceFile(JTabbedPane tabbedPane, Dimension screenSize, File file) {
         try {
             TraceFile traceFile = TraceReader.parseTraceFile(file);
-            tabbedPane.addTab(TraceReader.getBaseName(file.getName()), new TracePanel(traceFile, screenSize));
+            tabbedPane.addTab(FilenameUtils.getBaseName(file.getName()), new TracePanel(traceFile, screenSize));
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "打开trace文件出错", JOptionPane.ERROR_MESSAGE);
         }
