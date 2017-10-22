@@ -29,4 +29,19 @@ class ListStackTraces implements StackTraces {
         }
         return size;
     }
+
+    @Override
+    public String toString(boolean distinct) {
+        if (distinct) {
+            Collections.sort(list);
+        }
+        StringBuilder sb = new StringBuilder();
+        Set<MatchesPair> set = new HashSet<>(list.size());
+        for (MatchesPair pair : list) {
+            if (!distinct || set.add(pair)) {
+                sb.append(pair.leaf.getStackTraceString()).append('\n');
+            }
+        }
+        return sb.toString();
+    }
 }
