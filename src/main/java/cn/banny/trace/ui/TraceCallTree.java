@@ -1,6 +1,7 @@
 package cn.banny.trace.ui;
 
 import cn.banny.trace.CallNode;
+import cn.banny.trace.MethodCallNode;
 import cn.banny.trace.ThreadInfo;
 
 import javax.swing.*;
@@ -16,7 +17,9 @@ class TraceCallTree extends JTree {
             @Override
             public void valueChanged(TreeSelectionEvent e) {
                 CallNode node = (CallNode) TraceCallTree.this.getLastSelectedPathComponent();
-                callStackOutput.setText(node.getStackTraceString());
+                if (node instanceof MethodCallNode) {
+                    callStackOutput.setText(MethodCallNode.class.cast(node).getStackTraceString());
+                }
             }
         });
     }

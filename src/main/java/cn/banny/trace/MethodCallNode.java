@@ -8,4 +8,10 @@ public interface MethodCallNode extends CallNode {
 
     int getThreadTimeInUsec();
 
+    String getStackTraceString();
+
+    MethodCallNode matchesStackElement(String keywords, boolean exact);
+
+    int getStackTraceSize();
+
 }

@@ -20,16 +20,6 @@ public class SelectThreadInfo implements ThreadInfo {
     }
 
     @Override
-    public String getStackTraceString() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean matchesStackElement(String keywords, boolean exact) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public String toString() {
         return "选择线程";
     }

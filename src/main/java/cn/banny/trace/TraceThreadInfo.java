@@ -55,14 +55,4 @@ class TraceThreadInfo implements ThreadInfo {
         sb.append(" - ").append(threadName);
         return sb.toString();
     }
-
-    @Override
-    public String getStackTraceString() {
-        return toString().trim();
-    }
-
-    @Override
-    public boolean matchesStackElement(String keywords, boolean exact) {
-        return false;
-    }
 }

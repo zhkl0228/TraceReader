@@ -59,7 +59,17 @@ public class TraceMethodCallNode implements MethodCallNode {
     }
 
     @Override
-    public boolean matchesStackElement(String keywords, boolean exact) {
+    public int getStackTraceSize() {
+        int size = 0;
+        MethodCallNode node = this;
+        do {
+            size++;
+        } while ((node = node.getParent()) != null);
+        return size;
+    }
+
+    @Override
+    public MethodCallNode matchesStackElement(String keywords, boolean exact) {
         if (keywords == null) {
             throw new NullPointerException("keywords is null");
         }
@@ -77,15 +87,15 @@ public class TraceMethodCallNode implements MethodCallNode {
             if (exact) {
                 if (keywords.equals(className) || keywords.equals(methodName) ||
                         keywords.equals(fullName)) {
-                    return true;
+                    return node;
                 }
             } else {
                 if (fullName.toLowerCase().contains(keywords.toLowerCase())) {
-                    return true;
+                    return node;
                 }
             }
         } while ((node = node.getParent()) != null);
-        return false;
+        return null;
     }
 
     @Override
@@ -95,4 +105,20 @@ public class TraceMethodCallNode implements MethodCallNode {
         }
         return method.toString();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TraceMethodCallNode that = (TraceMethodCallNode) o;
+
+        return methodId == that.methodId;
+    }
+
+    @Override
+    public int hashCode() {
+        return methodId;
+    }
+
 }

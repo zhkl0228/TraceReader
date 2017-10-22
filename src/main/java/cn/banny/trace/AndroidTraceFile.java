@@ -3,7 +3,6 @@ package cn.banny.trace;
 import java.io.DataInput;
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.*;
 
 class AndroidTraceFile implements TraceFile {
@@ -316,32 +315,30 @@ class AndroidTraceFile implements TraceFile {
     }
 
     @Override
-    public boolean dumpStackTrace(PrintStream out, String keywords) {
-        boolean dumped = false;
+    public StackTraces findStackTrace(String keywords) {
+        List<MatchesPair> list = new ArrayList<>();
         for (ThreadInfo threadInfo : threadInfos) {
-            dumped |= processCallNode(threadInfo, threadInfo.getChildren(), out, keywords, true);
+            processCallNode(null, threadInfo.getChildren(), list, keywords, true);
         }
-        if (!dumped) {
+        if (list.isEmpty()) {
             for (ThreadInfo threadInfo : threadInfos) {
-                dumped |= processCallNode(threadInfo, threadInfo.getChildren(), out, keywords, false);
+                processCallNode(null, threadInfo.getChildren(), list, keywords, false);
             }
         }
-        return dumped;
+        return new ListStackTraces(list);
     }
 
-    private boolean processCallNode(CallNode node, MethodCallNode[] children, PrintStream out, String keywords, boolean exact) {
-        if (children.length < 1) { // leaf
-            if (node.matchesStackElement(keywords, exact)) {
-                out.println(node.getStackTraceString());
-                return true;
+    private void processCallNode(MethodCallNode leaf, MethodCallNode[] children, List<MatchesPair> list, String keywords, boolean exact) {
+        if (leaf != null && children.length < 1) { // is leaf
+            MethodCallNode matches = leaf.matchesStackElement(keywords, exact);
+            if (matches != null) {
+                list.add(new MatchesPair(matches, leaf));
             }
-            return false;
+            return;
         }
 
-        boolean flag = false;
         for (MethodCallNode child : children) {
-            flag |= processCallNode(child, child.getChildren(), out, keywords, exact);
+            processCallNode(child, child.getChildren(), list, keywords, exact);
         }
-        return flag;
     }
 }
